@@ -1,0 +1,41 @@
+{
+  "root": true,
+  "env": { "node": true, "es2022": true },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": { "ecmaVersion": "latest", "sourceType": "module" },
+  "plugins": ["@typescript-eslint", "import"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended-type-checked",
+    "plugin:import/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": ["tests/**", "vitest.config.ts"] }],
+    "import/order": ["error", { "groups": ["builtin", "external", "internal", "parent", "sibling", "index"], "pathGroups": [{ "pattern": "@/**", "group": "internal" }], "pathGroupsExcludedImportTypes": ["builtin"] }],
+    "import/no-restricted-paths": [
+      "error",
+      {
+        "zones": [
+          {
+            "target": "./lib/domain",
+            "from": "./lib/adapters",
+            "message": "Domain cannot import adapters"
+          },
+          {
+            "target": "./lib/domain",
+            "from": "./lib/http",
+            "message": "Domain cannot import http"
+          },
+          {
+            "target": "./lib/domain",
+            "from": "./lib/service",
+            "message": "Domain cannot import service"
+          }
+        ]
+      }
+    ]
+  },
+  "ignorePatterns": ["dist/", "node_modules/", "*.config.*"]
+}

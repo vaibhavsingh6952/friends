@@ -1,0 +1,113 @@
+---
+interface Props {
+  languages: import("@friends/api/lib/domain/types").LanguageMix[];
+  languageOfWeek: import("@friends/api/lib/domain/types").LanguageOfWeek | null;
+}
+const { languages, languageOfWeek } = Astro.props;
+const totalBytes = languages.reduce((sum, l) => sum + l.bytes, 0);
+---
+<div class="panel">
+  <h2 class="panel-title">Languages</h2>
+  <div class="lang-bar" role="img" aria-label="Language distribution">
+    {languages.map((l) => (
+      <div
+        class="lang-segment"
+        style={`width: ${totalBytes > 0 ? (l.bytes / totalBytes) * 100 : 0}%; background: ${l.color};`}
+        title={`${l.name}: ${(l.share * 100).toFixed(1)}%`}
+      ></div>
+    ))}
+  </div>
+  <ul class="lang-legend">
+    {languages.map((l) => (
+      <li>
+        <span class="lang-color" style={`background: ${l.color};`}></span>
+        <span class="lang-name">{l.name}</span>
+        <span class="lang-percent">{(l.share * 100).toFixed(1)}%</span>
+      </li>
+    ))}
+  </ul>
+  {languageOfWeek && (
+    <div class="lang-week">
+      Language of the week: <strong>{languageOfWeek.name}</strong>
+      <span class="lang-week-color" style={`background: ${languageOfWeek.color};`}></span>
+    </div>
+  )}
+</div>
+<style>
+  .panel {
+    background: rgba(0, 0, 0, 0.12);
+    border: 2px solid #e9dcd3;
+    border-radius: 2px;
+    padding: 16px;
+  }
+  .panel-title {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f4eae1;
+    text-align: center;
+    margin: 0 0 12px;
+    letter-spacing: 0.05em;
+  }
+  .lang-bar {
+    display: flex;
+    height: 16px;
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid #e9dcd3;
+    margin-bottom: 12px;
+  }
+  .lang-segment {
+    height: 100%;
+    min-width: 2px;
+    transition: width 0.3s ease;
+    outline: 1px solid rgba(255,255,255,0.1);
+  }
+  .lang-legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .lang-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.7rem;
+    color: #f4eae1;
+  }
+  .lang-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+  .lang-percent {
+    color: #c9a9a6;
+    font-variant-numeric: tabular-nums;
+  }
+  .lang-week {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(233, 220, 211, 0.2);
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.75rem;
+    color: #f4eae1;
+    text-align: center;
+  }
+  .lang-week strong { color: #f4eae1; }
+  .lang-week-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.2);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+</style>

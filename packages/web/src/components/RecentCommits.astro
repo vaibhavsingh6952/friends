@@ -1,0 +1,119 @@
+---
+interface Props {
+  commits: import("@friends/api/lib/domain/types").RecentCommit[];
+}
+const { commits } = Astro.props;
+---
+<div class="panel">
+  <h2 class="panel-title">Last 5 commits</h2>
+  <ul class="commit-list">
+    {commits.map((c) => (
+      <li class="commit-row">
+        <img class="avatar" src={c.avatarUrl} alt={c.login} width="28" height="28" loading="lazy" />
+        <div class="commit-info">
+          <div class="commit-header">
+            <span class="commit-login">{c.login}</span>
+            <span class="commit-repo">pushed to {c.repo}</span>
+            {c.live && <span class="live-dot" aria-label="Live"></span>}
+          </div>
+          <div class="commit-message">{c.message}</div>
+          <div class="commit-time">{formatRelativeTime(c.committedAt)}</div>
+        </div>
+      </li>
+    ))}
+    {commits.length === 0 && <li class="empty">No recent commits</li>}
+  </ul>
+</div>
+<script>
+  import { formatRelativeTime } from "../lib/format.js";
+</script>
+<style>
+  .panel {
+    background: rgba(0, 0, 0, 0.12);
+    border: 2px solid #e9dcd3;
+    border-radius: 2px;
+    padding: 16px;
+  }
+  .panel-title {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f4eae1;
+    text-align: center;
+    margin: 0 0 12px;
+    letter-spacing: 0.05em;
+  }
+  .commit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .commit-row {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(233, 220, 211, 0.15);
+  }
+  .commit-row:last-child { border-bottom: none; }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #e9dcd3;
+    flex-shrink: 0;
+  }
+  .commit-info { flex: 1; min-width: 0; }
+  .commit-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .commit-login {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f4eae1;
+  }
+  .commit-repo {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.7rem;
+    color: #c9a9a6;
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6ee7a0;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot { animation: none; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.9); }
+  }
+  .commit-message {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.7rem;
+    color: #c9a9a6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  .commit-time {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.65rem;
+    color: #c9a9a6;
+    margin-top: 2px;
+  }
+  .empty {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.75rem;
+    color: #c9a9a6;
+    text-align: center;
+    padding: 20px;
+  }
+</style>

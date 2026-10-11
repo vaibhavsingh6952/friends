@@ -1,0 +1,25 @@
+---
+interface Props {
+  kpis: import("@friends/api/lib/domain/types").KPIs;
+}
+const { kpis } = Astro.props;
+---
+<div class="kpi-strip" role="region" aria-label="Key metrics">
+  <KpiTile value={kpis.friendsCount} label="Friends" />
+  <KpiTile value={formatNumber(kpis.commits30d)} label="Commits 30d" />
+  <KpiTile value={kpis.activeNow} label="Active now" />
+  <KpiTile value={kpis.languages} label="Languages" />
+</div>
+<script>
+  import KpiTile from "./KpiTile.astro";
+  import { formatNumber } from "../lib/format.js";
+</script>
+<style>
+  .kpi-strip {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+</style>

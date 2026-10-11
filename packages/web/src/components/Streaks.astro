@@ -1,0 +1,115 @@
+---
+interface Props {
+  streaks: import("@friends/api/lib/domain/types").Streak[];
+}
+const { streaks } = Astro.props;
+---
+<div class="panel">
+  <h2 class="panel-title">Contribution streaks</h2>
+  <div class="streaks-list">
+    {streaks.map((s) => (
+      <div class="streak-row">
+        <img class="avatar" src={s.avatarUrl} alt={s.login} width="32" height="32" loading="lazy" />
+        <div class="streak-info">
+          <div class="streak-login">{s.login}</div>
+          <div class="streak-current">{s.current} <span class="streak-unit">days</span></div>
+        </div>
+        <div class="streak-best">best 365d: {s.best365}</div>
+        <div class="streak-dots" aria-label={`Last 30 days activity for ${s.login}`}>
+          {s.last30.map((count, i) => (
+            <span class={`streak-dot ${count > 0 ? "active" : ""}`} style={`--delay: ${i * 30}ms`}></span>
+          ))}
+        </div>
+      </div>
+    ))}
+    {streaks.length === 0 && <div class="empty">No streak data</div>}
+  </div>
+</div>
+<style>
+  .panel {
+    background: rgba(0, 0, 0, 0.12);
+    border: 2px solid #e9dcd3;
+    border-radius: 2px;
+    padding: 16px;
+  }
+  .panel-title {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f4eae1;
+    text-align: center;
+    margin: 0 0 12px;
+    letter-spacing: 0.05em;
+  }
+  .streaks-list { display: flex; flex-direction: column; gap: 10px; }
+  .streak-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(233, 220, 211, 0.15);
+  }
+  .streak-row:last-child { border-bottom: none; }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e9dcd3;
+    flex-shrink: 0;
+  }
+  .streak-info { flex: 1; min-width: 0; }
+  .streak-login {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #f4eae1;
+  }
+  .streak-current {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #6ee7a0;
+    line-height: 1;
+  }
+  .streak-unit {
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: #c9a9a6;
+    margin-left: 2px;
+  }
+  .streak-best {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.65rem;
+    color: #c9a9a6;
+    white-space: nowrap;
+  }
+  .streak-dots {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .streak-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 1px;
+    background: rgba(201, 169, 166, 0.3);
+    animation: dotIn 0.3s ease forwards;
+    opacity: 0;
+  }
+  .streak-dot.active {
+    background: #6ee7a0;
+  }
+  @keyframes dotIn {
+    to { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .streak-dot { animation: none; opacity: 1; }
+  }
+  .empty {
+    font-family: "Trebuchet MS", "Segoe UI", system-ui;
+    font-size: 0.75rem;
+    color: #c9a9a6;
+    text-align: center;
+    padding: 20px;
+  }
+</style>

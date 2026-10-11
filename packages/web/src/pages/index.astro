@@ -1,0 +1,119 @@
+---
+import { fetchDashboard, getUsernameFromUrl, setUsernameInUrl } from "../lib/api.js";
+import SearchForm from "../components/SearchForm.astro";
+import KpiStrip from "../components/KpiStrip.astro";
+import RecentCommits from "../components/RecentCommits.astro";
+import HeroCommitters from "../components/HeroCommitters.astro";
+import Languages from "../components/Languages.astro";
+import Streaks from "../components/Streaks.astro";
+import TopRepos from "../components/TopRepos.astro";
+
+const usernameParam = Astro.url.searchParams.get("u");
+const savedUsername = usernameParam;
+
+let data = null;
+let error = null;
+let stale = false;
+
+if (usernameParam) {
+  try {
+    data = await fetchDashboard(usernameParam);
+    stale = data.stale;
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Failed to load data";
+  }
+}
+---
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Friends Dashboard</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Friends Dashboard</h1>
+        <SearchForm onSubmit={setUsernameInUrl} defaultValue={savedUsername ?? ""} />
+        {data && <KpiStrip kpis={data.kpis} />}
+      </header>
+
+      <main>
+        {error && (
+          <div class="error-panel" role="alert">
+            <h2>Error</h2>
+            <p>{error}</p>
+            <button onclick="window.location.reload()">Retry</button>
+          </div>
+        )}
+
+        {data && !error && (
+          <>
+            {stale && <div class="stale-badge">Showing cached data from {new Date(data.fetchedAt).toLocaleString()}</div>}
+            <div class="grid">
+              <RecentCommits class="recent-commits" commits={data.recentCommits} />
+              <HeroCommitters class="hero-committers" committers={data.topCommitters} />
+              <Languages class="languages" languages={data.languages} languageOfWeek={data.languageOfWeek} />
+              <Streaks class="streaks" streaks={data.streaks} />
+              <TopRepos class="top-repos" repos={data.topRepos} />
+            </div>
+          </>
+        )}
+
+        {!data && !error && !usernameParam && (
+          <div class="loading-skeleton" style="grid-column: 1 / -1;">
+            <p style="color: var(--muted); margin: 0;">Enter a GitHub username to see their friends' activity</p>
+          </div>
+        )}
+
+        {!data && !error && usernameParam && (
+          <div class="loading-skeleton" style="grid-column: 1 / -1;">
+            <p style="color: var(--muted); margin: 0;">Fetching from GitHub, the first load can take a few seconds</p>
+            <div class="skeleton-bar" style="width: 200px;"></div>
+          </div>
+        )}
+      </main>
+
+      <footer>
+        Public GitHub data only. Not affiliated with GitHub.
+        <br />
+        To opt out, open an issue to add your username to the hidden list.
+      </footer>
+    </div>
+
+    <script>
+      const form = document.querySelector('[data-search-form]');
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const input = form.querySelector('input[name="username"]');
+          if (input && input.value.trim()) {
+            setUsernameInUrl(input.value.trim());
+            window.location.reload();
+          }
+        });
+      }
+
+      try {
+        const saved = localStorage.getItem('friends-username');
+        if (saved && !usernameParam) {
+          const input = form?.querySelector('input[name="username"]');
+          if (input) input.value = saved;
+        }
+      } catch {}
+
+      if (form) {
+        form.addEventListener('submit', () => {
+          const input = form.querySelector('input[name="username"]');
+          if (input) {
+            try { localStorage.setItem('friends-username', input.value.trim()); } catch {}
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
